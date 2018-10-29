@@ -34,3 +34,6 @@ export const LEFT = 'left'
 export const RIGHT = 'right'
 
 export const HEAD = 0 
+
+export const Y_OFFSET = 100
+export const X_OFFSET = 50

@@ -7,6 +7,10 @@ const Square = (props) => {
     border: '2px solid gray',
     width: constants.CELLWIDTH,
     height: constants.CELLHEIGHT,
+    zIndex: props.zIndex,
+    position: 'absolute',
+    top: props.top,
+    left: props.left,
   }
   return (
     <div
