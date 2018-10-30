@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
-import * as constants from '../constants'
+import * as constants from '../helpers/constants'
 
 const Square = (props) => {
   const style = {
     backgroundColor: props.backgroundColor,
-    border: '2px solid gray',
+    border: props.border ? '2px solid gray' : '',
     width: constants.CELLWIDTH,
     height: constants.CELLHEIGHT,
     zIndex: props.zIndex,

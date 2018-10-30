@@ -1,5 +1,5 @@
 import React from 'react'
-import * as constants from '../constants'
+import * as constants from '../helpers/constants'
 import Square from './square'
 import { relative } from 'path';
 
@@ -20,6 +20,7 @@ const Board = (props) => {
               top={i*constants.CELLHEIGHT + constants.Y_OFFSET}              
               left={j * constants.CELLWIDTH + constants.X_OFFSET}
               zIndex='0'
+              border={true}
             />
           )
         })

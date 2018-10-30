@@ -1,15 +1,12 @@
 
 export const FPS = 15
-
+export const INTERVAL = 1000/FPS
 export const WINDOWWIDTH = 640
-
 export const WINDOWHEIGHT = 480
-
 export const CELLSIZE = 20
-
 export const CELLWIDTH = parseInt(WINDOWWIDTH / CELLSIZE)
-
-export const CELLHEIGHT = parseInt(WINDOWHEIGHT / CELLSIZE) 
+export const CELLHEIGHT = parseInt(WINDOWHEIGHT / CELLSIZE)
+export const BORDERWIDTH = 2
 
 export const WHITE     = 'rgb(255, 255, 255)'
 

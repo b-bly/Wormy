@@ -1,15 +1,22 @@
 import React, { Fragment } from 'react'
-import * as constants from '../constants'
+import * as constants from '../helpers/constants'
 import Square from './square'
 
+// playerPosition: {
+//   top: middleY,
+//   left: middleX,
+// },
+
 const Worm = (props) => {
+  const { playerPosition: { top, left }} = props
   return (
     <Fragment>
       <Square 
         backgroundColor={constants.RED}
         zIndex={'2'}
-        top={constants.Y_OFFSET}
-        left={constants.X_OFFSET}
+        top={top}
+        left={left}
+        border={false}
       />
     </Fragment>
   )
