@@ -6,17 +6,17 @@ import Worm from '../Game/worm'
 
 const getDefaultState = () => {
   const middle = (Math.floor(CELLSIZE / 2)) - 1
-  const middleX = middle * CELLWIDTH + X_OFFSET + BORDERWIDTH / 2
-  const middleY = middle * CELLHEIGHT + Y_OFFSET + BORDERWIDTH / 2
+  const middleX = middle * CELLWIDTH + BORDERWIDTH / 2
+  const middleY = middle * CELLHEIGHT + BORDERWIDTH / 2
 
   return {
     playerPosition: {
-      top: middleY,
+      top: 0,
       left: middleX,
-      
+
     },
     playerDirection: LEFT,
-    playerSpeed: 4,
+    playerSpeed: 8,
     score: 0,
   }
 }
@@ -53,8 +53,7 @@ export default class Game extends Component {
   }
   componentDidMount() {
     this.startGame()
-    console.log(this.state)
-
+    console.log(WINDOWWIDTH - PLAYERWIDTH)
   }
 
   startGame = () => {
@@ -67,11 +66,15 @@ export default class Game extends Component {
     // this.gameInterval = setInterval(this.updateEnemiesInPlay, 250);
   }
 
+  // need to 
+
   updatePlayerPosition = () => {
-    const { playerPosition, playerSpeed, playerDirection } = this.state
-      console.log(playerDirection);
-      
-    switch(playerDirection) {
+    const { playerPosition, playerSpeed, playerDirection, playerPosition: { top, left } } = this.state
+
+    // console.log(playerPosition.left);
+
+
+    switch (playerDirection) {
       case UP:
         playerPosition.top -= playerSpeed
         break;
@@ -85,30 +88,31 @@ export default class Game extends Component {
         playerPosition.left -= playerSpeed
         break;
     }
+    // check walls
+    switch (playerDirection) {
+      case UP:
+        if (top <= 0) playerPosition.top = 0;
+        break;
+      case DOWN:
+        if (top >= WINDOWHEIGHT - PLAYERHEIGHT) playerPosition.top = WINDOWHEIGHT - PLAYERHEIGHT;
+        break;
+      case LEFT:
+        if (left <= 0) playerPosition.left = 0;
+        break;
+      case RIGHT:
+        if (left >= WINDOWWIDTH - PLAYERWIDTH) playerPosition.left = WINDOWWIDTH - PLAYERWIDTH;
+        break;
+    }
+    this.setPlayerPosition(playerPosition)
+  }
+
+  setPlayerPosition = (playerPosition) => {
     this.setState({
-      playerPosition: playerPosition,
+      playerPosition: playerPosition
     })
   }
 
   handlePlayerMovement = (direction) => {
-    const { top, left } = this.state.playerPosition;
-
-    // check walls
-    // switch (dirObj.dir) {
-    //   case UP:
-    //     if (top === 0) return;
-    //     break;
-    //   case DOWN:
-    //     if (top === WINDOWHEIGHT - PLAYERHEIGHT) return;
-    //     break;
-    //   case LEFT:
-    //     if (left === 0) return;
-    //     break;
-    //   case RIGHT:
-    //     if (left === WINDOWWIDTH - PLAYERWIDTH) return;
-    //     break;
-    // }
-
     this.setState({
       playerDirection: direction
     });
