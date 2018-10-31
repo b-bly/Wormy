@@ -28,7 +28,7 @@ class Worm extends Component {
       default:
         return;
     }
-
+    
     this.props.handlePlayerMovement(newDirection);
   }
   render() {

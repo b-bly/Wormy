@@ -9,6 +9,14 @@ export const CELLHEIGHT = parseInt(WINDOWHEIGHT / CELLSIZE)
 export const PLAYERWIDTH = CELLWIDTH
 export const PLAYERHEIGHT = CELLHEIGHT
 export const BORDERWIDTH = 2
+export const TOTAL_CELL_HEIGHT = CELLHEIGHT + BORDERWIDTH * 2;
+export const TOTAL_CELL_WIDTH = CELLWIDTH + BORDERWIDTH * 2;
+export const X_VALUES = Array(CELLSIZE).fill('').map((el, i, arr) => { 
+  return i * TOTAL_CELL_HEIGHT;
+});
+export const Y_VALUES = Array(CELLSIZE).fill('').map((el, i, arr) => { 
+  return i * TOTAL_CELL_WIDTH;
+});
 
 export const WHITE     = 'rgb(255, 255, 255)'
 
