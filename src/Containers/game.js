@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { CELLWIDTH, X_OFFSET, Y_OFFSET, BORDERWIDTH, CELLHEIGHT, INTERVAL, WINDOWWIDTH, WINDOWHEIGHT, PLAYERWIDTH, PLAYERHEIGHT, CELLSIZE, UP, DOWN, LEFT, RIGHT, Y_VALUES, X_VALUES } from '../helpers/constants'
+import { CELLWIDTH, X_OFFSET, Y_OFFSET, BORDERWIDTH, CELLHEIGHT, INTERVAL, WINDOWWIDTH, WINDOWHEIGHT, PLAYERWIDTH, PLAYERHEIGHT, CELLSIZE, UP, DOWN, LEFT, RIGHT, Y_VALUES, X_VALUES, TOTAL_CELL_WIDTH, TOTAL_CELL_HEIGHT } from '../helpers/constants'
 import Board from '../Game/board'
 import Worm from '../Game/worm'
 
@@ -87,37 +87,43 @@ export default class Game extends Component {
         case UP:
           // if threshold not reached, keep moving in playerDirection (do nothing)
           if (top <= playerTurningDirection.turnThreshold) {
-            thresholdExceeded = true;
+            // if threshold exceeded,
+            // reassign playerDirection so player will move in turningDirection + playerspeed
+            playerDirection = playerTurningDirection.direction
+            // make sure player is turning in the row or column coords
+            playerPosition.top = playerTurningDirection.turnThreshold;
+            playerTurningDirection = null
+
           }
           break;
         case RIGHT:
           if (left >= playerTurningDirection.turnThreshold) {
-            thresholdExceeded = true;
+            playerDirection = playerTurningDirection.direction
+            playerPosition.left = playerTurningDirection.turnThreshold;
+            playerTurningDirection = null
+
           }
           break;
         case DOWN:
 
           if (top >= playerTurningDirection.turnThreshold) {
-            thresholdExceeded = true;
+            playerDirection = playerTurningDirection.direction
+            playerPosition.top = playerTurningDirection.turnThreshold;
+            playerTurningDirection = null
+
           }
           break;
         case LEFT:
 
           if (left <= playerTurningDirection.turnThreshold) {
-            thresholdExceeded = true;
-            console.log('turning soon');
+            playerDirection = playerTurningDirection.direction
+            playerPosition.left = playerTurningDirection.turnThreshold;
+            playerTurningDirection = null
+
           }
           break;
       }
-      if (thresholdExceeded === true) {
-        // if threshold exceeded,
-        // reassign playerDirection so player will move in turningDirection + playerspeed
-        playerDirection = playerTurningDirection.direction
-        playerTurningDirection = null
-        console.log('playerDirection')
-        console.log(playerDirection);
 
-      }
     }
     switch (playerDirection) {
       case UP:
@@ -141,13 +147,13 @@ export default class Game extends Component {
         if (top <= 0) playerPosition.top = 0;
         break;
       case DOWN:
-        if (top >= WINDOWHEIGHT - PLAYERHEIGHT) playerPosition.top = WINDOWHEIGHT - PLAYERHEIGHT;
+        if (top >= WINDOWHEIGHT - TOTAL_CELL_HEIGHT) playerPosition.top = WINDOWHEIGHT - TOTAL_CELL_HEIGHT;
         break;
       case LEFT:
         if (left <= 0) playerPosition.left = 0;
         break;
       case RIGHT:
-        if (left >= WINDOWWIDTH - PLAYERWIDTH) playerPosition.left = WINDOWWIDTH - PLAYERWIDTH;
+        if (left >= WINDOWWIDTH - TOTAL_CELL_WIDTH) playerPosition.left = WINDOWWIDTH - TOTAL_CELL_WIDTH;
         break;
     }
     this.setState({
@@ -190,23 +196,28 @@ export default class Game extends Component {
       // Set threshold to the greatest y value that is lower than player.top.
       case UP:
         // looping from small to large values of y
-        threshold = Y_VALUES.reduce((_, val) => val <= playerPosition.top ? val : playerPosition.top, Y_VALUES[0])
+        console.log(Y_VALUES)
+        threshold = Y_VALUES.reduce((previous, val) => val <= playerPosition.top ? val : previous, Y_VALUES[0])
         break;
       case DOWN:
         // threshold = lowest y that is HIGHER than position.top
         // looping from large to small
-        threshold = Y_VALUES.reverse().reduce((_, val) => val >= playerPosition.top ? val : playerPosition.top, Y_VALUES[0])
+        threshold = [...Y_VALUES].reverse().reduce((previous, val) => val >= playerPosition.top ? val : previous, Y_VALUES[0])
         break;
       case LEFT:
         // highest x that is lower than position.left
-        threshold = X_VALUES.reduce((_, val) => val <= playerPosition.left ? val : playerPosition.left, X_VALUES[0])
+        threshold = X_VALUES.reduce((previous, val) => val <= playerPosition.left ? val : previous, X_VALUES[0])
         break;
       case RIGHT:
-        threshold = X_VALUES.reverse().reduce((_, val) => val >= playerPosition.left ? val : playerPosition.left, X_VALUES[0])
+        threshold = [...X_VALUES].reverse().reduce((previous, val) => val >= playerPosition.left ? val : previous, X_VALUES[0])
         break;
       default:
         break;
     }
+    console.log('threshold');
+
+    console.log(threshold);
+
     return threshold
   }
 

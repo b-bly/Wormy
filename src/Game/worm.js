@@ -39,8 +39,8 @@ class Worm extends Component {
         <Square
           backgroundColor={RED}
           zIndex={'2'}
-          top={top + Y_OFFSET + BORDERWIDTH/2}
-          left={left + X_OFFSET + BORDERWIDTH/2}
+          top={top + Y_OFFSET + BORDERWIDTH}
+          left={left + X_OFFSET + BORDERWIDTH}
           border={false}
         />
       </Fragment>
