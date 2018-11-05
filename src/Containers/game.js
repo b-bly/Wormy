@@ -4,6 +4,7 @@ import Board from '../Game/board'
 import WormHead from '../Game/worm-head'
 import WormBody from '../Game/worm-body'
 
+let counter = 0;
 
 const getDefaultState = () => {
   const middle = (Math.floor(CELLSIZE / 2)) - 1
@@ -15,7 +16,7 @@ const getDefaultState = () => {
         position: {
           top: 0,
           left: middleX,
-          direction: LEFT,
+          direction: RIGHT,
           bodyIndex: 0
         },
         turning: []
@@ -25,7 +26,7 @@ const getDefaultState = () => {
         position: {
           top: 0,
           left: middleX + TOTAL_CELL_WIDTH,
-          direction: LEFT,
+          direction: RIGHT,
           bodyIndex: 1
         },
         turning: []
@@ -156,6 +157,7 @@ export default class Game extends Component {
     // if player is turning, map playerState, checking each body piece and only updating if
     // past the turning threshold.
     let turning = false;
+
     playerState = [...playerState].map((piece, i) => {
       if (piece.turning.length > 0) {
         let { position: { direction: playerDirection } } = piece
@@ -173,25 +175,34 @@ export default class Game extends Component {
               // make sure player is turning in the row or column coords
               piece.position.top = threshold;
               // remove turn object from queue
-              piece.turning.unshift();
+              piece.turning.shift();
             }
             break;
           case RIGHT:
             if (left >= threshold) {
+              if (counter < 2) {
+                console.log('turning right before update');
+                console.log(piece);
+              }
               piece.position.direction = turningDirection
               piece.position.left = threshold;
-              piece.turning.unshift();
+              piece.turning.shift();
+              counter++
+              if (counter < 2) {
+                console.log('turning right');
+                console.log(piece);
+              }
             }
             break;
           case DOWN:
             if (top >= threshold) {
               piece.position.direction = turningDirection
               piece.position.top = threshold;
-              piece.turning.unshift();
+              piece.turning.shift();
 
             }
             break;
-          case LEFT:          
+          case LEFT:
             if (left <= threshold) {
               piece.position.direction = turningDirection
               piece.position.left = threshold;
