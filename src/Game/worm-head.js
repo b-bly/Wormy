@@ -8,7 +8,7 @@ import Square from './square'
 //   left: middleX,
 // },
 
-class Worm extends Component {
+class WormHead extends Component {
 
   handleKeyDown = (e) => {
     let newDirection;
@@ -29,7 +29,7 @@ class Worm extends Component {
         return;
     }
     
-    this.props.handlePlayerMovement(newDirection);
+    this.props.handlePlayerMovement(newDirection, this.props.playerPosition.bodyIndex);
   }
   render() {
     const { playerPosition: { top, left } } = this.props
@@ -52,4 +52,4 @@ class Worm extends Component {
   }
 }
 
-export default Worm
+export default WormHead

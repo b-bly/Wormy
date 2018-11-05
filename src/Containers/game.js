@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { CELLWIDTH, X_OFFSET, Y_OFFSET, BORDERWIDTH, CELLHEIGHT, INTERVAL, WINDOWWIDTH, WINDOWHEIGHT, PLAYERWIDTH, PLAYERHEIGHT, CELLSIZE, UP, DOWN, LEFT, RIGHT, Y_VALUES, X_VALUES, TOTAL_CELL_WIDTH, TOTAL_CELL_HEIGHT } from '../helpers/constants'
 import Board from '../Game/board'
-import Worm from '../Game/worm'
+import WormHead from '../Game/worm-head'
+import WormBody from '../Game/worm-body'
 
 
 const getDefaultState = () => {
@@ -15,6 +16,7 @@ const getDefaultState = () => {
           top: 0,
           left: middleX,
           direction: LEFT,
+          bodyIndex: 0
         },
         turning: []
       },
@@ -24,6 +26,7 @@ const getDefaultState = () => {
           top: 0,
           left: middleX + TOTAL_CELL_WIDTH,
           direction: LEFT,
+          bodyIndex: 1
         },
         turning: []
       }
@@ -131,8 +134,6 @@ export default class Game extends Component {
     // this.gameInterval = setInterval(this.updateEnemiesInPlay, 250);
   }
 
-  // need to 
-
   updatePlayerPosition = () => {
     // const { playerPosition, playerSpeed, playerPosition: { top, left } } = this.state
     // let { playerTurningDirection, playerDirection } = this.state
@@ -145,54 +146,63 @@ export default class Game extends Component {
           left: 0,
           direction: LEFT,
         },
-        turning: []
+        turning: [{
+          direction: LEFT,
+          threshold: 0,
+        }]
       },
     ]
-    // Deal with turning later
-    // if player is turning,
-    // if (playerTurningDirection !== null) {
-    //   // if threshold not reached, keep moving in playerDirection
-    //   switch (playerDirection) {
-    //     case UP:
-    //       // if threshold not reached, keep moving in playerDirection (do nothing)
-    //       if (top <= playerTurningDirection.turnThreshold) {
-    //         // if threshold exceeded,
-    //         // reassign playerDirection so player will move in turningDirection + playerspeed
-    //         playerDirection = playerTurningDirection.direction
-    //         // make sure player is turning in the row or column coords
-    //         playerPosition.top = playerTurningDirection.turnThreshold;
-    //         playerTurningDirection = null
 
-    //       }
-    //       break;
-    //     case RIGHT:
-    //       if (left >= playerTurningDirection.turnThreshold) {
-    //         playerDirection = playerTurningDirection.direction
-    //         playerPosition.left = playerTurningDirection.turnThreshold;
-    //         playerTurningDirection = null
+    // if player is turning, map playerState, checking each body piece and only updating if
+    // past the turning threshold.
+    let turning = false;
+    playerState = [...playerState].map((piece, i) => {
+      if (piece.turning.length > 0) {
+        let { position: { direction: playerDirection } } = piece
+        const { direction: turningDirection, threshold } = piece.turning[0]
+        let top = piece.position.top,
+          left = piece.position.left
+        // if threshold not reached, keep moving in playerDirection
+        switch (playerDirection) {
+          case UP:
+            // if threshold not reached, keep moving in playerDirection (do nothing)
+            if (top <= threshold) {
+              // if threshold exceeded,
+              // reassign playerDirection so player will move in turningDirection + playerspeed
+              piece.position.direction = turningDirection
+              // make sure player is turning in the row or column coords
+              piece.position.top = threshold;
+              // remove turn object from queue
+              piece.turning.unshift();
+            }
+            break;
+          case RIGHT:
+            if (left >= threshold) {
+              piece.position.direction = turningDirection
+              piece.position.left = threshold;
+              piece.turning.unshift();
+            }
+            break;
+          case DOWN:
+            if (top >= threshold) {
+              piece.position.direction = turningDirection
+              piece.position.top = threshold;
+              piece.turning.unshift();
 
-    //       }
-    //       break;
-    //     case DOWN:
+            }
+            break;
+          case LEFT:          
+            if (left <= threshold) {
+              piece.position.direction = turningDirection
+              piece.position.left = threshold;
+              piece.turning.shift();
+            }
+            break;
+        }
+      }
+      return piece;
+    })
 
-    //       if (top >= playerTurningDirection.turnThreshold) {
-    //         playerDirection = playerTurningDirection.direction
-    //         playerPosition.top = playerTurningDirection.turnThreshold;
-    //         playerTurningDirection = null
-
-    //       }
-    //       break;
-    //     case LEFT:
-
-    //       if (left <= playerTurningDirection.turnThreshold) {
-    //         playerDirection = playerTurningDirection.direction
-    //         playerPosition.left = playerTurningDirection.turnThreshold;
-    //         playerTurningDirection = null
-
-    //       }
-    //       break;
-    //   }
-    // }
     playerState = [...playerState].map((bodyPiece) => {
       const { direction: playerDirection, top, left } = bodyPiece.position
       const playerPosition = { ...bodyPiece.position }
@@ -230,7 +240,7 @@ export default class Game extends Component {
       }
       return {
         position: playerPosition,
-        turning: [],
+        turning: bodyPiece.turning
       }
     })
     this.setState({
@@ -239,45 +249,59 @@ export default class Game extends Component {
   }
 
   // player pressing direction keys in worm.js
-  handlePlayerMovement = (direction) => {
+  handlePlayerMovement = (direction, bodyIndex) => {
     // how to handle a player pressing keys repeatedly before the worm has turned: 
     // If there's a previous turn for the worm head: replace previous turn with the 
     // new one. ( for each body piece)
     // If no turn in queue, then add it to each body piece.
     let { playerState } = this.state
 
-    playerState = playerState.map((piece) => {
-
+    playerState = [...playerState].map((piece, i) => {
       let threshold = null
-      let { position: { direction: playerDirection }, turning: { direction: playerTurningDirection } } = piece;
+      let { position: { direction: playerDirection } } = piece;
       // can't go backwards.  Don't register if opposite: if going 'UP', you can't go 'DOWN'
-      if (playerDirection !== OPPOSITE_DIRECTIONS[direction]) {
-        // can't be the same direction
-        if (direction !== playerDirection) {
-          // set playerTurningDirection if it is a different direction (ie player didn't hit left twice)
-          threshold = this.getTurnThreshold();
-          playerTurningDirection = {
-            direction: direction,
-            turnThreshold: threshold,
-          };
-          // don't update direction
+      if (playerDirection !== OPPOSITE_DIRECTIONS[direction] &&
+        // don't respond to player pressing the same direction that the worm is currently going.
+        direction !== playerDirection) {
+        // set playerTurningDirection if it is a different direction (ie player didn't hit left twice)
+        threshold = this.getTurnThreshold(playerState[0].position.direction, playerState[0].position);
+        const turning = {
+          direction: direction,
+          threshold: threshold,
+        };
+        //update piece.turning
+        // if there's a turn object for the head, then we will replace this turn object
+        if (playerState[0].turning.length > 0 &&
+          // don't update if the player pushed the same direction (repeatedly pressing a key)
+          playerState[0].turning.direction !== direction) {
+          if (i === 0) {
+            piece.turning[0] = turning;
+          } else {
+            piece.turning.pop();
+            piece.turning.push(turning);
+          }
+        } else {
+          if (i === 0) {
+            // only one turning object for the worm head
+            piece.turning[0] = turning;
+          } else {
+            // add turning obj to the queue
+            piece.turning.push(turning);
+          }
         }
-        this.setState({
-          playerTurningDirection: playerTurningDirection,
-        }, () => {
-          console.log(this.state);
-
-        });
       }
-
+      return piece;
     })
+    this.setState({
+      playerState: playerState
+    }, () => console.log(this.state))
   }
 
-  getTurnThreshold = () => {
+  getTurnThreshold = (playerDirection, playerPosition) => {
     // const { playerDirection, playerPosition } = this.state;
     // ***placeholders for testing REPLACE!
-    const playerDirection = 'LEFT'
-    const playerPosition = { top: 0, left: 0 }
+    // const playerDirection = 'LEFT'
+    // const playerPosition = { top: 0, left: 0 }
 
     let threshold
     switch (playerDirection) {
@@ -303,10 +327,6 @@ export default class Game extends Component {
       default:
         break;
     }
-    console.log('threshold');
-
-    console.log(threshold);
-
     return threshold
   }
 
@@ -329,9 +349,9 @@ export default class Game extends Component {
     return (
       <div>
         <Board />
-        <Worm playerPosition={this.state.playerState[0].position}
+        <WormHead playerPosition={this.state.playerState[0].position}
           handlePlayerMovement={this.handlePlayerMovement} />
-        <Worm playerPosition={this.state.playerState[1].position}
+        <WormBody playerPosition={this.state.playerState[1].position}
           handlePlayerMovement={this.handlePlayerMovement} />
       </div>
     )
