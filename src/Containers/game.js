@@ -136,6 +136,7 @@ export default class Game extends Component {
   }
 
   updatePlayerPosition = () => {
+    const self = this
     // const { playerPosition, playerSpeed, playerPosition: { top, left } } = this.state
     // let { playerTurningDirection, playerDirection } = this.state
     // let thresholdExceeded = false;
@@ -161,6 +162,15 @@ export default class Game extends Component {
     playerState = [...playerState].map((piece, i) => {
       if (piece.turning.length > 0) {
         let { position: { direction: playerDirection } } = piece
+        const { position: { bodyIndex } } = piece
+        let pieceInFrontLeft, pieceInFrontTop
+        if (bodyIndex > 0) {
+          pieceInFrontLeft = playerState[bodyIndex - 1].position.left
+          pieceInFrontTop = playerState[bodyIndex - 1].position.top
+          console.log(pieceInFrontLeft)
+          console.log(pieceInFrontTop);
+          
+        }
         const { direction: turningDirection, threshold } = piece.turning[0]
         let top = piece.position.top,
           left = piece.position.left
@@ -168,12 +178,17 @@ export default class Game extends Component {
         switch (playerDirection) {
           case UP:
             // if threshold not reached, keep moving in playerDirection (do nothing)
+            
             if (top <= threshold) {
               // if threshold exceeded,
               // reassign playerDirection so player will move in turningDirection + playerspeed
               piece.position.direction = turningDirection
-              // make sure player is turning in the row or column coords
+              // make sure player is turning in the row or column coords by setting the head to the threshold
               piece.position.top = threshold;
+              // to do, set body piece at least BORDERWIDTH *2 behind piece in front of it.
+              if (bodyIndex > 0) {
+                piece.position.left = turningDirection === LEFT ? pieceInFrontLeft + CELLWIDTH + BORDERWIDTH : pieceInFrontLeft - (CELLWIDTH + BORDERWIDTH)
+              }
               // remove turn object from queue
               piece.turning.shift();
             }
@@ -186,18 +201,27 @@ export default class Game extends Component {
               }
               piece.position.direction = turningDirection
               piece.position.left = threshold;
+              if (bodyIndex > 0) {
+                console.log('bodyIndex', bodyIndex);
+                
+                piece.position.top = turningDirection === UP ? pieceInFrontTop + CELLHEIGHT + BORDERWIDTH : pieceInFrontTop - (CELLHEIGHT + BORDERWIDTH)
+              }
               piece.turning.shift();
               counter++
               if (counter < 2) {
                 console.log('turning right');
                 console.log(piece);
               }
+              // self.pause()
             }
             break;
           case DOWN:
             if (top >= threshold) {
               piece.position.direction = turningDirection
               piece.position.top = threshold;
+              if (bodyIndex > 0) {
+                piece.position.left = turningDirection === LEFT ? pieceInFrontLeft + CELLWIDTH + BORDERWIDTH : pieceInFrontLeft - (CELLWIDTH + BORDERWIDTH)
+              }
               piece.turning.shift();
 
             }
@@ -206,6 +230,9 @@ export default class Game extends Component {
             if (left <= threshold) {
               piece.position.direction = turningDirection
               piece.position.left = threshold;
+              if (bodyIndex > 0) {
+                piece.position.top = turningDirection === UP ? pieceInFrontTop + CELLHEIGHT + BORDERWIDTH : pieceInFrontTop - (CELLHEIGHT + BORDERWIDTH)
+              }
               piece.turning.shift();
             }
             break;
@@ -240,13 +267,13 @@ export default class Game extends Component {
           if (top <= 0) playerPosition.top = 0;
           break;
         case DOWN:
-          if (top >= WINDOWHEIGHT - TOTAL_CELL_HEIGHT) playerPosition.top = WINDOWHEIGHT - TOTAL_CELL_HEIGHT;
+          if (top >= WINDOWHEIGHT - TOTAL_CELL_HEIGHT + BORDERWIDTH*2) playerPosition.top = WINDOWHEIGHT - TOTAL_CELL_HEIGHT + BORDERWIDTH*2;
           break;
         case LEFT:
           if (left <= 0) playerPosition.left = 0;
           break;
         case RIGHT:
-          if (left >= WINDOWWIDTH - TOTAL_CELL_WIDTH) playerPosition.left = WINDOWWIDTH - TOTAL_CELL_WIDTH;
+          if (left >= WINDOWWIDTH - TOTAL_CELL_WIDTH + BORDERWIDTH*2) playerPosition.left = WINDOWWIDTH - TOTAL_CELL_WIDTH + BORDERWIDTH*2;
           break;
       }
       return {
@@ -257,6 +284,10 @@ export default class Game extends Component {
     this.setState({
       playerState: playerState
     })
+  }
+
+  pause = () => {
+    window.clearInterval(this.playerInterval)
   }
 
   // player pressing direction keys in worm.js
