@@ -171,15 +171,21 @@ export default class Game extends Component {
           // console.log(pieceInFrontTop);
 
         }
-        const { direction: turningDirection, threshold } = piece.turning[0]
-        let top = piece.position.top,
-          left = piece.position.left
+        const { direction: turningDirection } = piece.turning[0]
+        
+        // let top = piece.position.top,
+        //   left = piece.position.left,
+        //   threshold = piec.turning[0].threshold
+        let { top, left } = piece.position
+        // to turn before going over a border
+        let { threshold } = piece.turning[0]
+        
         // if threshold not reached, keep moving in playerDirection
         switch (playerDirection) {
           case UP:
             // if threshold not reached, keep moving in playerDirection (do nothing)
-
-            if (top <= threshold) {
+            // playerSpeed is subtracted from threshold to make a turn happen before crossing a border
+            if (top <= threshold + playerSpeed) {
               // if threshold exceeded,
               // reassign playerDirection so player will move in turningDirection + playerspeed
               piece.position.direction = turningDirection
@@ -194,7 +200,7 @@ export default class Game extends Component {
             }
             break;
           case RIGHT:
-            if (left >= threshold) {
+            if (left >= threshold - playerSpeed) {
               if (counter < 2) {
        
               }
@@ -212,7 +218,7 @@ export default class Game extends Component {
             }
             break;
           case DOWN:
-            if (top >= threshold) {
+            if (top >= threshold - playerSpeed) {
               piece.position.direction = turningDirection
               piece.position.top = threshold;
               if (bodyIndex > 0) {
@@ -223,7 +229,7 @@ export default class Game extends Component {
             }
             break;
           case LEFT:
-            if (left <= threshold) {
+            if (left <= threshold + playerSpeed) {
               piece.position.direction = turningDirection
               piece.position.left = threshold;
               if (bodyIndex > 0) {

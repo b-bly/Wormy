@@ -2,7 +2,7 @@
 export const FPS = 5
 export const INTERVAL = 1000 / FPS // how often game is updated in ms
 export const WINDOWWIDTH = 640
-export const WINDOWHEIGHT = 480 // pixels
+export const WINDOWHEIGHT = 640 // pixels
 export const CELLSIZE = 20  // number squares on board.  Should be called board size?
 export const CELLWIDTH = parseInt(WINDOWWIDTH / CELLSIZE) // width in pixels of board cell
 export const CELLHEIGHT = parseInt(WINDOWHEIGHT / CELLSIZE)
