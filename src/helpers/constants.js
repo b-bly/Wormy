@@ -17,8 +17,6 @@ export const X_VALUES = Array(CELLSIZE).fill('').map((el, i, arr) => {
 export const Y_VALUES = Array(CELLSIZE).fill('').map((el, i, arr) => {
   return i * CELLHEIGHT;
 });
-console.log(X_VALUES)
-console.log(Y_VALUES);
 
 
 export const WHITE = 'rgb(255, 255, 255)'

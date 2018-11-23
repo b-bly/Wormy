@@ -25,9 +25,18 @@ const getDefaultState = () => {
       { // second piece (body)
         position: {
           top: 0,
-          left: middleX + TOTAL_CELL_WIDTH,
+          left: middleX - TOTAL_CELL_WIDTH ,
           direction: RIGHT,
           bodyIndex: 1
+        },
+        turning: []
+      },
+      {
+        position: {
+          top: 0,
+          left: middleX - ( TOTAL_CELL_WIDTH * 2),
+          direction: RIGHT,
+          bodyIndex: 2
         },
         turning: []
       }
@@ -42,46 +51,6 @@ const getDefaultState = () => {
     score: 0,
   }
 }
-
-// *** More than one piece to body ***
-// need a different state structure
-// the head of the snake could be more than one turn ahead of a body piece
-// So turns need to be stored in an array until all of body has turned
-// How about:
-const playerState = [
-  { // first item is the head
-    position: {
-      top: 0,
-      left: 0,
-      direction: LEFT
-    },
-    turning: [  // should not be array for head?
-      {
-        direction: '',
-        threshold: 0,
-      },
-    ]
-  },
-  { // second piece (body)
-    position: {
-      top: 0,
-      left: 0,
-      threshold: 0,
-    },
-    turning: [
-      {
-        direction: '',
-        threshold: 0,
-      },
-      {  // push upcoming turns to array
-        direction: '',
-        threshold: 0,
-      },
-    ]
-  }
-]
-// With this structure, I just have to adjust the code to loop through the array.
-// And instead of setting turning to null, unshift one turn from the array
 
 const OPPOSITE_DIRECTIONS = {
   UP: DOWN,
@@ -298,7 +267,10 @@ export default class Game extends Component {
     // If there's a previous turn for the worm head: replace previous turn with the 
     // new one. ( for each body piece)
     // If no turn in queue, then add it to each body piece.
+    
     let { playerState } = this.state
+    console.log(playerState);
+    
     const { position: { direction: playerDirection } } = playerState[0]
     const headTurn = playerState[0].turning.slice();
     let updatedPlayerState = {}
@@ -400,14 +372,22 @@ export default class Game extends Component {
 
 
   render() {
-
+    const body = this.state.playerState.slice(1).map((piece) => 
+      <WormBody
+      playerPosition={piece.position}
+      handlePlayerMovement={this.handlePlayerMovement}
+      />
+    )
     return (
       <div>
         <Board />
         <WormHead playerPosition={this.state.playerState[0].position}
           handlePlayerMovement={this.handlePlayerMovement} />
-        <WormBody playerPosition={this.state.playerState[1].position}
-          handlePlayerMovement={this.handlePlayerMovement} />
+          <Fragment>
+            {body}
+          </Fragment>
+        {/* <WormBody playerPosition={this.state.playerState[1].position}
+          handlePlayerMovement={this.handlePlayerMovement} /> */}
       </div>
     )
   }
